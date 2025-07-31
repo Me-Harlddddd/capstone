@@ -81,20 +81,15 @@ class RoomEquipmentsController extends Controller
         $qrText = "Room Equiment Code: {$equipments->room_equipment_code} \nType: {$equipments->type} \nRoom: {$rooms->room_name}";
         
         //Generate Qr Png
-        $qrCodePng = QrCode::format('png')->size(350)->generate($qrText);
+        $qrCodeSvg = QrCode::format('svg')->size(400)->generate($qrText);
 
 
-        $imagick = new \Imagick();
-        $imagick->readImageBlob($qrCodePng);
-        $imagick->setImageFormat('png');
-
-        $filename = 'Room Equipments ' . $equipments->room_equipment_code .  $equipments->type . '.png';
+        $filename = 'Room Equipments ' . $equipments->room_equipment_code .  $equipments->type . '.svg';
         $path = 'qr_codes/' .$filename;
 
-        Storage::disk('public')->put($path, $imagick->getImageBlob());
+        Storage::disk('public')->put($path, $qrCodeSvg);
 
         //Update the Qr path in the record
-
         $equipments->update([
             'qr_code_path' => $path,
         ]);

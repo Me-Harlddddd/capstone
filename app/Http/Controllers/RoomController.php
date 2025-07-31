@@ -9,6 +9,7 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 
 
+
 class RoomController extends Controller
 {
     /**
@@ -55,21 +56,15 @@ public function store(Request $request)
     // Generate the full URL
     $url = url('/rooms/' . $room->room_code);
 
-    // Generate QR code data in PNG format
-    $qrCodePng = QrCode::format('png')->size(350)->generate($url);
+    // Generate QR code in SVG format
+    $qrCodeSvg = QrCode::format('svg')->size(400)->generate($url);
 
-    // Create an Imagick object from the QR PNG data
-    $imagick = new \Imagick();
-    $imagick->readImageBlob($qrCodePng);
-    $imagick->setImageFormat('png'); // Ensure format
-
-
-    // Save the image to storage/app/public/qr_codes
-    $fileName = 'qr_' . $room->room_code . '.png';
+    // Save SVG to storage/app/public/qr_codes
+    $fileName = 'qr_' . $room->room_code . '.svg';
     $path = 'qr_codes/' . $fileName;
-    Storage::disk('public')->put($path, $imagick->getImageBlob());
+    Storage::disk('public')->put($path, $qrCodeSvg);
 
-    // Update the room with the QR code path
+    // Update room with the QR code path
     $room->update([
         'qr_code_path' => $path,
     ]);

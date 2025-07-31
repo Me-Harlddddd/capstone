@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { router, usePage } from '@inertiajs/react';
@@ -38,6 +38,10 @@ export default function Units() {
             router.delete(`/admin/units/${id}`);
         }
     };
+
+
+    const [selectedQR, setSelectedQR] = useState(null)
+    const [copied, setCopied] = useState(false);
 
     return (
         <AdminLayout>
@@ -109,11 +113,19 @@ export default function Units() {
                                     <td className="px-4 py-2 border">{unit.condition}</td>
                                     <td className="px-4 py-2 border">
                                         {unit.qr_code_path ? (
-                                            <img
-                                                src={`/storage/${unit.qr_code_path}`}
-                                                alt="QR Code"
-                                                className="w-12 h-12 object-contain"
-                                            />
+                                             <img
+                                        src={`/storage/${unit.qr_code_path}`}
+                                        alt="QR Code"
+                                        className="w-12 h-12 object-contain cursor-pointer"
+                                        onClick={() =>
+                                            setSelectedQR({
+                                                image: `/storage/${unit.qr_code_path}`,
+                                                unit_name: unit.unit_number,
+                                                unit_code: unit.unit_code,
+                                            })
+                                        }
+
+                                        />
                                         ) : (
                                             <span className="text-gray-400 italic">No QR</span>
                                         )}
@@ -164,6 +176,59 @@ export default function Units() {
             <div className="mt-4 text-sm text-gray-500">
                 Showing {units.from} to {units.to} of {units.total} units
             </div>
+
+
+
+
+               {selectedQR && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                    onClick={() => {
+                    setSelectedQR(null);
+                    setCopied(false);
+                    }}
+                >
+                    <div
+                    className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-xl text-center relative"
+                    onClick={(e) => e.stopPropagation()} // Prevent modal close when clicking inside
+                    >
+                    <h2 className="text-2xl font-semibold mb-4 text-gray-800">QR Code</h2>
+                    <img
+                        src={selectedQR.image}
+                        alt="Large QR"
+                        className="w-72 h-72 mx-auto cursor-pointer hover:scale-105 transition-transform"
+                        onClick={() => {
+                        navigator.clipboard.writeText(selectedQR.url).then(() => {
+                            setCopied(true);
+                            setTimeout(() => setCopied(false), 2000);
+                        });
+                        }}
+                    />
+                    <p className="text-sm text-gray-500 mt-2">Click the QR to copy the room URL</p>
+
+                    {copied && (
+                        <div className="mt-2 text-green-600 text-sm">Link copied to clipboard!</div>
+                    )}
+
+                    {/* Room Name and Code */}
+                    <div className="mt-6 text-gray-700">
+                        <p><span className="font-semibold">Unit Number:</span> {selectedQR.unit_name}</p>
+                        <p><span className="font-semibold">Unit Code:</span> {selectedQR.unit_code}</p>
+                    </div>
+
+                    {/* Close Button */}
+                    <button
+                        onClick={() => {
+                        setSelectedQR(null);
+                        setCopied(false);
+                        }}
+                        className="absolute top-3 right-4 text-gray-600 hover:text-red-600 text-2xl font-bold"
+                    >
+                        &times;
+                    </button>
+                    </div>
+                </div>
+                )}
         </AdminLayout>
     );
 }

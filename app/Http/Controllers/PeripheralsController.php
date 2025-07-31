@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
-
+use Illuminate\Validation\Rule;
 
 class PeripheralsController extends Controller
 {
@@ -82,7 +82,13 @@ class PeripheralsController extends Controller
         //
 
         $validate = $request->validate([
-            'peripherals_code' => 'required | unique:peripherals',
+            'peripherals_code' => [
+                'required',
+                Rule::unique('peripherals')->where(function ($query) use ($request) {
+                    return $query->where('room_id', $request->room_id)
+                    ->where('unit_id', $request->unit_id);
+                }),
+            ],
             'room_id' => 'required |exists:rooms,id',
             'unit_id' => 'required |exists:units,id' ,
             'type' => 'required |in:Mouse,Keyboard',
@@ -108,22 +114,16 @@ class PeripheralsController extends Controller
         $room = Rooms::find($request->room_id);
         $unit = Units::find($request->unit_id);
 
-            $qrText = "Peripheral Code: {$peripherals->peripherals_code}\nRoom: {$room->room_name}\nUnit: {$unit->unit_code}";
+        $qrText = "Peripheral Code: {$peripherals->peripherals_code}\nRoom: {$room->room_name}\nUnit: {$unit->unit_code}";
 
         // Generate QR PNG
-        $qrCodePng = QrCode::format('png')->size(350)->generate($qrText);
-
-        $imagick = new \Imagick();
-        $imagick->readImageBlob($qrCodePng);
-        $imagick->setImageFormat('png');
-
+        $qrCodeSvg = QrCode::format('svg')->size(400)->generate($qrText);
 
         storage::disk('public')->makeDirectory('qr_codes');
-
-        $fileName = 'QR_Peripheral_' . $peripherals->peripherals_code . '.png';
+        $fileName = 'QR_Peripheral_' . $peripherals->peripherals_code . '.svg';
         $path = 'qr_codes/' .$fileName;
 
-        Storage::disk('public')->put($path, $imagick->getImageBlob());
+        Storage::disk('public')->put($path, $qrCodeSvg);
 
         $peripherals->update([
             'qr_code_path' => $path,

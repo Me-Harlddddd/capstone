@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('units', function (Blueprint $table) {
             $table->id();
-            $table->string('unit_code')->unique();
+            $table->unique(['unit_code', 'room_id']); // ✅ Composite unique key
+
             $table->unsignedBigInteger('room_id');
             $table->string('unit_number');
             $table->string('processor');

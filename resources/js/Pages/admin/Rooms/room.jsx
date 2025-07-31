@@ -10,6 +10,8 @@ export default function Rooms({ rooms }) {
     const { flash } = usePage().props;
     const [showSuccess, setShowSuccess] = useState(!!flash.success);
     const [search, setSearch] = useState('');
+    const [selectedQR, setSelectedQR] = useState(null);
+    const [copied, setCopied] = useState(false);
 
     const filteredRooms = rooms.filter(room =>
         room.room_name.toLowerCase().includes(search.toLowerCase()) ||
@@ -111,11 +113,21 @@ export default function Rooms({ rooms }) {
                                     </td>
                                     <td className="px-6 py-3 border">
                                         {room.qr_code_path ? (
-                                            <img
-                                                src={`/storage/${room.qr_code_path}`}
-                                                alt="QR Code"
-                                                className="w-12 h-12 object-contain"
-                                            />
+                                           <img
+                                        src={`/storage/${room.qr_code_path}`}
+                                        alt="QR Code"
+                                        className="w-12 h-12 object-contain cursor-pointer"
+                                        onClick={() =>
+                                            setSelectedQR({
+                                                image: `/storage/${room.qr_code_path}`,
+                                                url: `${window.location.origin}/rooms/${room.room_code}`,
+                                                room_name: room.room_name,
+                                                room_code: room.room_code,
+                                            })
+                                        }
+
+                                        />
+
                                         ) : (
                                             <span className="text-gray-400 italic">No QR</span>
                                         )}
@@ -153,6 +165,58 @@ export default function Rooms({ rooms }) {
             <div className="mt-4 text-sm text-gray-500">
                 Showing {filteredRooms.length} of {rooms.length} rooms
             </div>
+
+                    {selectedQR && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                    onClick={() => {
+                    setSelectedQR(null);
+                    setCopied(false);
+                    }}
+                >
+                    <div
+                    className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-xl text-center relative"
+                    onClick={(e) => e.stopPropagation()} // Prevent modal close when clicking inside
+                    >
+                    <h2 className="text-2xl font-semibold mb-4 text-gray-800">QR Code</h2>
+                    <img
+                        src={selectedQR.image}
+                        alt="Large QR"
+                        className="w-72 h-72 mx-auto cursor-pointer hover:scale-105 transition-transform"
+                        onClick={() => {
+                        navigator.clipboard.writeText(selectedQR.url).then(() => {
+                            setCopied(true);
+                            setTimeout(() => setCopied(false), 2000);
+                        });
+                        }}
+                    />
+                    <p className="text-sm text-gray-500 mt-2">Click the QR to copy the room URL</p>
+
+                    {copied && (
+                        <div className="mt-2 text-green-600 text-sm">Link copied to clipboard!</div>
+                    )}
+
+                    {/* Room Name and Code */}
+                    <div className="mt-6 text-gray-700">
+                        <p><span className="font-semibold">Room Name:</span> {selectedQR.room_name}</p>
+                        <p><span className="font-semibold">Room Code:</span> {selectedQR.room_code}</p>
+                    </div>
+
+                    {/* Close Button */}
+                    <button
+                        onClick={() => {
+                        setSelectedQR(null);
+                        setCopied(false);
+                        }}
+                        className="absolute top-3 right-4 text-gray-600 hover:text-red-600 text-2xl font-bold"
+                    >
+                        &times;
+                    </button>
+                    </div>
+                </div>
+                )}
+
+
         </AdminLayout>
     );
 }

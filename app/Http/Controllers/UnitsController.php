@@ -8,6 +8,8 @@ use App\Models\Rooms; //
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Validation\Rule;
+
 
 class UnitsController extends Controller
 {
@@ -60,7 +62,12 @@ public function index(Request $request)
     public function store(Request $request)
     {
         $validate = $request->validate([
-            'unit_code' => 'required | unique:units',
+            'unit_code' => [
+                'required',
+                Rule::unique('units')->where(function ($query) use ($request) {
+                    return $query->where('room_id', $request->room_id);
+                }),
+            ],
             'room_id' => 'required |exists:rooms,id',
             'unit_number' => 'required',
             'processor' => 'required',
@@ -78,16 +85,13 @@ public function index(Request $request)
     $qrText = "Unit Code: {$unit->unit_code}\nRoom: {$room->room_name}";
 
     // Generate QR PNG
-    $qrCodePng = QrCode::format('png')->size(350)->generate($qrText);
+    $qrCodeSvg = QrCode::format('svg')->size(400)->generate($qrText);
 
-    $imagick = new \Imagick();
-    $imagick->readImageBlob($qrCodePng);
-    $imagick->setImageFormat('png');
 
-    $fileName = 'qr_unit_' . $unit->unit_code . '.png';
+    $fileName = 'qr_unit_' . $unit->unit_code . '.svg';
     $path = 'qr_codes/' . $fileName;
 
-    Storage::disk('public')->put($path, $imagick->getImageBlob());
+    Storage::disk('public')->put($path, $qrCodeSvg);
 
     // Update the QR path in the record
     $unit->update([

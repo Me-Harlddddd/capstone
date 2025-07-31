@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('peripherals', function (Blueprint $table) {
             $table->id();
-            $table->string('peripherals_code')->unique();
+            $table->unique(['peripherals_code', 'room_id', 'unit_id']);
             $table->unsignedBigInteger('room_id');
             $table->unsignedBigInteger('unit_id');
             $table->string('type');
