@@ -9,6 +9,18 @@ import {
 } from "@heroicons/react/24/outline";
 import { Link } from "@inertiajs/react";
 
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+
 export default function RoomDetails({ room, units, peripherals, equipments }) {
   const [activeTab, setActiveTab] = useState("units");
   const [searchQuery, setSearchQuery] = useState("");
@@ -76,16 +88,16 @@ export default function RoomDetails({ room, units, peripherals, equipments }) {
     const totalPages = Math.ceil(data.length / perPage);
 
     return (
-      <div className="space-y-4">
-        <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow">
-          <table className="min-w-full text-sm">
-            <thead className="bg-gray-100">
-              <tr>
+      <Card>
+        <CardContent className="overflow-x-auto p-0">
+          <Table className="min-w-max text-sm">
+            <TableHeader>
+              <TableRow>
                 {displayKeys.map((key, idx) => (
-                  <th
+                  <TableHead
                     key={idx}
-                    className="px-4 py-3 border-b text-left font-semibold capitalize text-xs cursor-pointer whitespace-nowrap"
                     onClick={() => handleSort(key)}
+                    className="cursor-pointer whitespace-nowrap"
                   >
                     {key.replace(/_/g, " ")}
                     {sortField === key && (
@@ -93,18 +105,18 @@ export default function RoomDetails({ room, units, peripherals, equipments }) {
                         {sortDirection === "asc" ? "▲" : "▼"}
                       </span>
                     )}
-                  </th>
+                  </TableHead>
                 ))}
-                <th className="px-4 py-3 border-b text-left font-semibold text-xs">Action</th>
-              </tr>
-            </thead>
-            <tbody>
+                <TableHead>Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {paginated.map((item, idx) => (
-                <tr key={idx} className="even:bg-gray-50 hover:bg-gray-100">
+                <TableRow key={idx}>
                   {displayKeys.map((key, i) => (
-                    <td
+                    <TableCell
                       key={i}
-                      className="px-4 py-2 border-b whitespace-nowrap text-gray-700"
+                      className="max-w-[200px] break-words text-gray-700"
                     >
                       {key === "qr_code_path" && item[key] ? (
                         <img
@@ -117,45 +129,47 @@ export default function RoomDetails({ room, units, peripherals, equipments }) {
                       ) : (
                         item[key] ?? "-"
                       )}
-                    </td>
+                    </TableCell>
                   ))}
-                  <td className="px-4 py-2 border-b">
+                  <TableCell>
                     <Link
                       href={`/admin/${activeTab}/${item.id}/edit`}
                       className="text-sm text-blue-600 hover:underline"
                     >
                       Edit
                     </Link>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
+        </CardContent>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between text-sm text-gray-600">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 text-sm text-gray-600">
           <span>
             Page {currentPage} of {totalPages}
           </span>
-          <div className="space-x-2">
-            <button
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
             >
               Prev
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
             >
               Next
-            </button>
+            </Button>
           </div>
         </div>
-      </div>
+      </Card>
     );
   };
 
@@ -185,12 +199,11 @@ export default function RoomDetails({ room, units, peripherals, equipments }) {
     return (
       <div className="space-y-4">
         {/* Search */}
-        <div className="flex items-center w-full max-w-md border rounded px-3 py-2 bg-white shadow-sm">
-          <MagnifyingGlassIcon className="h-5 w-5 text-gray-500" />
-          <input
+        <div className="flex items-center w-full max-w-full sm:max-w-md">
+          <MagnifyingGlassIcon className="h-5 w-5 text-gray-500 mr-2" />
+          <Input
             type="text"
             placeholder={`Search ${label}s...`}
-            className="ml-2 outline-none w-full"
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);

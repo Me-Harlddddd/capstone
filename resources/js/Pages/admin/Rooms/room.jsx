@@ -120,7 +120,7 @@ export default function Rooms({ rooms }) {
                                         onClick={() =>
                                             setSelectedQR({
                                                 image: `/storage/${room.qr_code_path}`,
-                                                url: `${window.location.origin}/rooms/${room.room_code}`,
+                                                url: `${window.location.origin}/faculty/${room.room_code}`,
                                                 room_name: room.room_name,
                                                 room_code: room.room_code,
                                             })

@@ -54,7 +54,7 @@ public function store(Request $request)
     $room = Rooms::create($validated);
 
     // Generate the full URL
-    $url = url('/rooms/' . $room->room_code);
+    $url = url('/faculty/' . $room->room_code);
 
     // Generate QR code in SVG format
     $qrCodeSvg = QrCode::format('svg')->size(400)->generate($url);
@@ -83,7 +83,7 @@ public function store(Request $request)
 {
     $room = Rooms::with(['units', 'equipments', 'peripherals'])->where('room_code', $roomCode)->firstOrFail();
 
-        return Inertia::render('admin/Rooms/RoomDetails', [
+        return Inertia::render('faculty/RoomDetails', [
             'room' => $room,
             'units' => $room->units, // Eager load in controller
             'peripherals' => $room->peripherals,

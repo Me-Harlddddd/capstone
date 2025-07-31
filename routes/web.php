@@ -68,7 +68,7 @@ Route::prefix('admin')->group(function () {
 
 });
 
-Route::get('/rooms/{roomCode}', [RoomController::class, 'show'])->name('rooms.show');
+Route::get('/faculty/{roomCode}', [RoomController::class, 'show'])->name('rooms.show', );
 
 // Authenticated dashboard
 Route::get('/dashboard', function () {

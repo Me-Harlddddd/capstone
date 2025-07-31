@@ -113,7 +113,7 @@ export default function Units() {
                                     <td className="px-4 py-2 border">{unit.condition}</td>
                                     <td className="px-4 py-2 border">
                                         {unit.qr_code_path ? (
-                                             <img
+                                             <img       
                                         src={`/storage/${unit.qr_code_path}`}
                                         alt="QR Code"
                                         className="w-12 h-12 object-contain cursor-pointer"
