@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { router, usePage } from '@inertiajs/react';
@@ -50,6 +50,9 @@ export default function RoomEquipments() {
     }
   });
 };
+
+const [selectedQR, setSelectedQR] = useState(null);
+const [copied, setCopied] = useState(false);
     return (
         <AdminLayout>
             <div className="mb-6 flex items-center justify-between">
@@ -115,11 +118,19 @@ export default function RoomEquipments() {
                                     <td className="px-4 py-2 border">{equipment.room?.room_name || '—'}</td>
                                     <td className="px-4 py-2 border">
                                         {equipment.qr_code_path ? (
-                                            <img
-                                                src={`/storage/${equipment.qr_code_path}`}
-                                                alt="QR Code"
-                                                className="w-12 h-12 object-contain"
-                                            />
+                                             <img
+                                        src={`/storage/${equipment.qr_code_path}`}
+                                        alt="QR Code"
+                                        className="w-12 h-12 object-contain cursor-pointer"
+                                        onClick={() =>
+                                            setSelectedQR({
+                                                image: `/storage/${equipment.qr_code_path}`,
+                                                equipment_name: equipment.type,
+                                                equipment_code: equipment.room_equipment_code,
+                                            })
+                                        }
+
+                                        />
                                         ) : (
                                             <span className="text-gray-400 italic">No QR</span>
                                         )}
@@ -170,6 +181,55 @@ export default function RoomEquipments() {
             <div className="mt-4 text-sm text-gray-500">
                 Showing {equipments.from} to {equipments.to} of {equipments.total} items
             </div>
+             {selectedQR && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                    onClick={() => {
+                    setSelectedQR(null);
+                    setCopied(false);
+                    }}
+                >
+                    <div
+                    className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-xl text-center relative"
+                    onClick={(e) => e.stopPropagation()} // Prevent modal close when clicking inside
+                    >
+                    <h2 className="text-2xl font-semibold mb-4 text-gray-800">QR Code</h2>
+                    <img
+                        src={selectedQR.image}
+                        alt="Large QR"
+                        className="w-72 h-72 mx-auto cursor-pointer hover:scale-105 transition-transform"
+                        onClick={() => {
+                        navigator.clipboard.writeText(selectedQR.url).then(() => {
+                            setCopied(true);
+                            setTimeout(() => setCopied(false), 2000);
+                        });
+                        }}
+                    />
+                    <p className="text-sm text-gray-500 mt-2">Click the QR to copy the room URL</p>
+
+                    {copied && (
+                        <div className="mt-2 text-green-600 text-sm">Link copied to clipboard!</div>
+                    )}
+
+                    {/* Room Name and Code */}
+                    <div className="mt-6 text-gray-700">
+                        <p><span className="font-semibold">Room Equipment Type:</span> {selectedQR.equipment_name}</p>
+                        <p><span className="font-semibold">Room Equipment  Code:</span> {selectedQR.equipment_code}</p>
+                    </div>
+
+                    {/* Close Button */}
+                    <button
+                        onClick={() => {
+                        setSelectedQR(null);
+                        setCopied(false);
+                        }}
+                        className="absolute top-3 right-4 text-gray-600 hover:text-red-600 text-2xl font-bold"
+                    >
+                        &times;
+                    </button>
+                    </div>
+                </div>
+                )}
         </AdminLayout>
     );
 }

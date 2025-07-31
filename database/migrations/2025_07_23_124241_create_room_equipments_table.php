@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('room_equipments', function (Blueprint $table) {
             $table->id();
-            $table->string('room_equipment_code')->unique();
+            $table->unique('room_equipment_code', 'room_id');
             $table->unsignedBigInteger('room_id');
             $table->string('type');
             $table->string('brand');

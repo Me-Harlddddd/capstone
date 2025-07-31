@@ -7,6 +7,8 @@ use App\Models\Rooms;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+
+use Illuminate\Validation\Rule;
 class RoomEquipmentsController extends Controller
 {
     /**
@@ -65,7 +67,12 @@ class RoomEquipmentsController extends Controller
     {
         //
         $validate = $request->validate([
-            'room_equipment_code' => 'required | unique:room_equipments',
+          'room_equipment_code' => [
+                'required',
+                Rule::unique('room_equipments')->where(function ($query) use ($request) {
+                    return $query->where('room_id', $request->room_id);
+                }),
+            ],
             'room_id' => 'required |exists:rooms,id',
             'type' => 'required',
             'brand' => 'required',

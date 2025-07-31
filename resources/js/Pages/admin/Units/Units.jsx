@@ -176,11 +176,7 @@ export default function Units() {
             <div className="mt-4 text-sm text-gray-500">
                 Showing {units.from} to {units.to} of {units.total} units
             </div>
-
-
-
-
-               {selectedQR && (
+            {selectedQR && (
                 <div
                     className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
                     onClick={() => {
