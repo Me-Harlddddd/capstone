@@ -195,7 +195,7 @@ export default function Rooms({ rooms }) {
                     {copied && (
                         <div className="mt-2 text-green-600 text-sm">Link copied to clipboard!</div>
                     )}
-
+                    <p className="mt-4 text-blue-600 underline break-all">{selectedQR.url}</p>
                     {/* Room Name and Code */}
                     <div className="mt-6 text-gray-700">
                         <p><span className="font-semibold">Room Name:</span> {selectedQR.room_name}</p>
